@@ -1,0 +1,81 @@
+<% content_for(:title) { "Skill Registry" } %>
+
+<!-- Conflict banner -->
+<% if @conflict_count > 0 %>
+  <div class="alert alert-danger d-flex justify-content-between align-items-center">
+    <span>
+      <strong><%= @conflict_count %> conflict<%= "s" if @conflict_count != 1 %> detected</strong>
+      — some skills share overlapping trigger keywords.
+    </span>
+    <%= link_to "View conflicts →", conflicts_path, class: "btn btn-danger btn-sm" %>
+  </div>
+<% else %>
+  <div class="alert alert-success">
+    <strong>All clear</strong> — no keyword conflicts detected.
+  </div>
+<% end %>
+
+<!-- Filter bar -->
+<div class="d-flex gap-2 mb-4 flex-wrap">
+  <%= link_to "All", root_path, class: "btn btn-outline-secondary btn-sm #{params[:category].blank? && params[:status].blank? ? 'active' : ''}" %>
+
+  <% %w[git pr deploy test infra].each do |cat| %>
+    <%= link_to cat.upcase, root_path(category: cat, status: params[:status]), class: "btn btn-outline-secondary btn-sm #{params[:category] == cat ? 'active' : ''}" %>
+  <% end %>
+
+  <span class="vr mx-1"></span>
+
+  <% %w[active draft deprecated].each do |s| %>
+    <%= link_to s.capitalize, root_path(status: s, category: params[:category]), class: "btn btn-outline-secondary btn-sm #{params[:status] == s ? 'active' : ''}" %>
+  <% end %>
+</div>
+
+<!-- Skills grid -->
+<% if @skills.any? %>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <% @skills.each do |skill| %>
+      <% skill_conflicts = skill.conflicts %>
+      <div class="col">
+        <div class="card h-100 shadow-sm <%= skill_conflicts.any? ? 'border-warning' : '' %>">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title mb-0">
+                <%= link_to skill.name, skill_path(skill), class: "text-decoration-none" %>
+              </h5>
+              <div class="d-flex gap-1">
+                <% badge_class = { "active" => "bg-success", "draft" => "bg-warning text-dark", "deprecated" => "bg-secondary" }[skill.status] || "bg-secondary" %>
+                <span class="badge <%= badge_class %>"><%= skill.status %></span>
+                <% if skill_conflicts.any? %>
+                  <span class="badge bg-danger" title="<%= skill_conflicts.length %> conflict(s)">&#9888;</span>
+                <% end %>
+              </div>
+            </div>
+
+            <% if skill.category.present? %>
+              <span class="badge bg-light text-dark border mb-2"><%= skill.category %></span>
+            <% end %>
+
+            <p class="card-text text-muted small"><%= truncate(skill.description, length: 100) %></p>
+
+            <% if skill.keyword_list.any? %>
+              <div class="d-flex flex-wrap gap-1 mt-2">
+                <% skill.keyword_list.each do |kw| %>
+                  <span class="badge bg-light text-dark border"><%= kw %></span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          <div class="card-footer bg-transparent d-flex justify-content-end gap-2">
+            <%= link_to "Edit", edit_skill_path(skill), class: "btn btn-outline-secondary btn-sm" %>
+            <%= button_to "Delete", skill_path(skill), method: :delete, class: "btn btn-outline-danger btn-sm", form: { data: { turbo_confirm: "Delete #{skill.name}?" } } %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="text-center text-muted py-5">
+    <p class="fs-5">No skills found.</p>
+    <%= link_to "+ Add your first skill", new_skill_path, class: "btn btn-primary" %>
+  </div>
+<% end %>

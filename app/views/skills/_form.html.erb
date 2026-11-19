@@ -1,0 +1,50 @@
+<%= form_with model: skill, class: "needs-validation" do |f| %>
+  <% if skill.errors.any? %>
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        <% skill.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= f.label :name, class: "form-label fw-semibold" %>
+    <%= f.text_field :name, class: "form-control", placeholder: "/commit" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :description, class: "form-label fw-semibold" %>
+    <%= f.text_area :description, class: "form-control", rows: 3, placeholder: "What does this skill do?" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :trigger_keywords, class: "form-label fw-semibold" %>
+    <%= f.text_field :trigger_keywords, class: "form-control", placeholder: "commit, git, save" %>
+    <div class="form-text">Comma-separated. Used for conflict detection.</div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-6">
+      <%= f.label :category, class: "form-label fw-semibold" %>
+      <%= f.select :category, %w[git pr deploy test infra], { include_blank: "— select —" }, class: "form-select" %>
+    </div>
+
+    <div class="col-md-6">
+      <%= f.label :status, class: "form-label fw-semibold" %>
+      <%= f.select :status, Skill::STATUSES, { include_blank: "— select —" }, class: "form-select" %>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <%= f.label :file_path, class: "form-label fw-semibold" %>
+    <%= f.text_field :file_path, class: "form-control", placeholder: ".claude/skills/commit.md" %>
+    <div class="form-text">Optional path in your repo.</div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <%= f.submit class: "btn btn-primary" %>
+    <%= link_to "Cancel", skill.persisted? ? skill_path(skill) : root_path, class: "btn btn-outline-secondary" %>
+  </div>
+<% end %>

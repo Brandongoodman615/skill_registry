@@ -1,0 +1,8 @@
+<% content_for(:title) { "Edit #{@skill.name}" } %>
+
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <h2 class="mb-4">Edit <%= @skill.name %></h2>
+    <%= render "form", skill: @skill %>
+  </div>
+</div>

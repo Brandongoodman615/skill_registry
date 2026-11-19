@@ -1,0 +1,84 @@
+<% content_for(:title) { @skill.name } %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><%= @skill.name %></h2>
+  <div class="d-flex gap-2">
+    <%= link_to "Edit", edit_skill_path(@skill), class: "btn btn-outline-secondary btn-sm" %>
+    <%= button_to "Delete", skill_path(@skill), method: :delete, class: "btn btn-outline-danger btn-sm", form: { data: { turbo_confirm: "Delete #{@skill.name}?" } } %>
+    <%= link_to "← All Skills", root_path, class: "btn btn-outline-secondary btn-sm" %>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="mb-3">
+          <% badge_class = { "active" => "bg-success", "draft" => "bg-warning text-dark", "deprecated" => "bg-secondary" }[@skill.status] || "bg-secondary" %>
+          <span class="badge <%= badge_class %> me-2"><%= @skill.status %></span>
+          <% if @skill.category.present? %>
+            <span class="badge bg-light text-dark border"><%= @skill.category %></span>
+          <% end %>
+        </div>
+
+        <% if @skill.description.present? %>
+          <p class="card-text"><%= @skill.description %></p>
+        <% end %>
+
+        <% if @skill.trigger_keywords.present? %>
+          <h6 class="text-muted mt-3">Trigger Keywords</h6>
+          <div class="d-flex flex-wrap gap-1">
+            <% @skill.keyword_list.each do |kw| %>
+              <span class="badge bg-light text-dark border"><%= kw %></span>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if @skill.file_path.present? %>
+          <h6 class="text-muted mt-3">File Path</h6>
+          <code><%= @skill.file_path %></code>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- AI Analysis -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-light">
+        <strong>AI Analysis</strong>
+        <% if @skill.last_analyzed_at %>
+          <span class="text-muted small ms-2">Last run: <%= @skill.last_analyzed_at.strftime("%b %d, %Y %H:%M") %></span>
+        <% else %>
+          <span class="badge bg-secondary ms-2">Not yet analyzed</span>
+        <% end %>
+      </div>
+      <div class="card-body text-muted small">
+        <%= @skill.ai_notes.presence || "No AI analysis available yet. Analysis runs on a scheduled job." %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow-sm <%= @conflicts.any? ? 'border-danger' : 'border-success' %>">
+      <div class="card-header <%= @conflicts.any? ? 'bg-danger text-white' : 'bg-success text-white' %>">
+        <strong>Conflicts (<%= @conflicts.length %>)</strong>
+      </div>
+      <div class="card-body">
+        <% if @conflicts.any? %>
+          <% @conflicts.each do |other| %>
+            <div class="mb-3">
+              <%= link_to other.name, skill_path(other), class: "fw-bold text-decoration-none" %>
+              <div class="d-flex flex-wrap gap-1 mt-1">
+                <span class="text-muted small me-1">Shared:</span>
+                <% @skill.shared_keywords_with(other).each do |kw| %>
+                  <span class="badge bg-warning text-dark"><%= kw %></span>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <p class="text-muted mb-0">No conflicts detected.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

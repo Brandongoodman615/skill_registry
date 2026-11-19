@@ -1,0 +1,44 @@
+<% content_for(:title) { "Conflicts" } %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Keyword Conflicts</h2>
+  <%= link_to "← Dashboard", root_path, class: "btn btn-outline-secondary btn-sm" %>
+</div>
+
+<% if @conflict_pairs.any? %>
+  <p class="text-muted mb-4">
+    <%= @conflict_pairs.length %> conflicting pair<%= "s" if @conflict_pairs.length != 1 %> found.
+    Skills that share trigger keywords may cause unpredictable behavior.
+  </p>
+
+  <div class="list-group shadow-sm">
+    <% @conflict_pairs.each do |pair| %>
+      <div class="list-group-item">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+          <div class="fw-semibold">
+            <%= link_to pair[:skill].name, skill_path(pair[:skill]), class: "text-decoration-none" %>
+            <span class="badge <%= { 'active' => 'bg-success', 'draft' => 'bg-warning text-dark', 'deprecated' => 'bg-secondary' }[pair[:skill].status] %>"><%= pair[:skill].status %></span>
+          </div>
+
+          <span class="text-danger fw-bold">&#8596;</span>
+
+          <div class="fw-semibold">
+            <%= link_to pair[:other].name, skill_path(pair[:other]), class: "text-decoration-none" %>
+            <span class="badge <%= { 'active' => 'bg-success', 'draft' => 'bg-warning text-dark', 'deprecated' => 'bg-secondary' }[pair[:other].status] %>"><%= pair[:other].status %></span>
+          </div>
+
+          <div class="ms-auto d-flex align-items-center gap-1">
+            <span class="text-muted small me-1">Shared keywords:</span>
+            <% pair[:shared].each do |kw| %>
+              <span class="badge bg-warning text-dark"><%= kw %></span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="alert alert-success">
+    <strong>All clear!</strong> No keyword conflicts detected across your skills.
+  </div>
+<% end %>
